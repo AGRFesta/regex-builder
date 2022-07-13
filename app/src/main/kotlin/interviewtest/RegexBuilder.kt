@@ -4,6 +4,14 @@ import interviewtest.Group.Companion.createInitialGroup
 import interviewtest.Group.Companion.createNewGroup
 import interviewtest.Group.Companion.noneGroup
 
+fun Set<String>.buildRegex(): String {
+    require(isNotEmpty()) {"Input Set can't be empty"}
+
+    return map { it.toGroupList() }
+        .reduce { acc, elem -> acc + elem }
+        .joinToString(separator = "") { it.toString() }
+}
+
 private enum class GroupType(private val matcher: (Char) -> Boolean) {
     DIGIT({it.isDigit()}), LETTER({it.isLetter()}), NONE({false});
 
@@ -46,15 +54,8 @@ private class Group(
     }
 }
 
-fun Set<String>.buildRegex(): String {
-    require(isNotEmpty()) {"Input Set can't be empty"}
-
-    return map { it.toGroupList() }
-        .reduce { acc, elem -> acc + elem }
-        .joinToString(separator = "") { it.toString() }
-}
-
 private fun String.toGroupList(): List<Group> {
+    require(isNotEmpty()) {"Input set can't contain empty strings"}
     require(this[0].isLetter()) {"First char must be a letter"}
     var actualGroup = createInitialGroup()
     val groupList = mutableListOf(actualGroup)

@@ -21,6 +21,48 @@ class RegexBuilderTest {
     }
 
     @Test
+    fun buildRegex_elementStartingWithDigitInputSet_throwsException() {
+        assertThat { setOf(
+            "AB123ZZ",
+            "345",
+            "CF678HG")
+            .buildRegex() }
+            .isFailure()
+            .all {
+                hasClass(IllegalArgumentException::class)
+                hasMessage("First char must be a letter")
+            }
+    }
+
+    @Test
+    fun buildRegex_elementContainingInvalidCharInputSet_throwsException() {
+        assertThat { setOf(
+            "AB123ZZ",
+            "ABC+234",
+            "CF678HG")
+            .buildRegex() }
+            .isFailure()
+            .all {
+                hasClass(IllegalArgumentException::class)
+                hasMessage("Input set contains invalid char: +")
+            }
+    }
+
+    @Test
+    fun buildRegex_emptyElementInputSet_throwsException() {
+        assertThat { setOf(
+            "AB123ZZ",
+            "",
+            "CF678HG")
+            .buildRegex() }
+            .isFailure()
+            .all {
+                hasClass(IllegalArgumentException::class)
+                hasMessage("Input set can't contain empty strings")
+            }
+    }
+
+    @Test
     fun buildRegex_simpleSet() {
         val regex = setOf(
             "AB123ZZ",
@@ -40,6 +82,17 @@ class RegexBuilderTest {
             .buildRegex()
 
         assertThat(regex).isEqualTo("[A-Z]{2,3}\\d{2,3}[A-Z]{2}")
+    }
+
+    @Test
+    fun buildRegex_singleCharGroupsSet() {
+        val regex = setOf(
+            "A",
+            "B4f4r",
+            "c6t")
+            .buildRegex()
+
+        assertThat(regex).isEqualTo("[A-Z]\\d{0,1}[A-Z]{0,1}\\d{0,1}[A-Z]{0,1}")
     }
 
     @Test
