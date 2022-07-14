@@ -13,7 +13,7 @@ fun Set<String>.buildRegex(): String {
 }
 
 private enum class GroupType(val matches: (Char) -> Boolean) {
-    DIGIT({it.isDigit()}), LETTER({it.isLetter() && !it.isLowerCase()}), NONE({false});
+    DIGIT({it.isDigit()}), LETTER({it.isUpperCase()}), NONE({false});
 
     operator fun plus(other: GroupType): GroupType = when {
             this == NONE -> other
