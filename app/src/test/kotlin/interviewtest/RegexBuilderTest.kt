@@ -49,6 +49,20 @@ class RegexBuilderTest {
     }
 
     @Test
+    fun buildRegex_elementContainingLowerCaseCharInputSet_throwsException() {
+        assertThat { setOf(
+            "AB123ZZ",
+            "ABCz234",
+            "CF678HG")
+            .buildRegex() }
+            .isFailure()
+            .all {
+                hasClass(IllegalArgumentException::class)
+                hasMessage("Input set contains invalid char: z")
+            }
+    }
+
+    @Test
     fun buildRegex_emptyElementInputSet_throwsException() {
         assertThat { setOf(
             "AB123ZZ",
@@ -88,8 +102,8 @@ class RegexBuilderTest {
     fun buildRegex_singleCharGroupsSet() {
         val regex = setOf(
             "A",
-            "B4f4r",
-            "c6t")
+            "B4F4R",
+            "C6T")
             .buildRegex()
 
         assertThat(regex).isEqualTo("[A-Z]\\d{0,1}[A-Z]{0,1}\\d{0,1}[A-Z]{0,1}")

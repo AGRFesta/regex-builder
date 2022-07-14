@@ -12,10 +12,9 @@ fun Set<String>.buildRegex(): String {
         .joinToString(separator = "") { it.toString() }
 }
 
-private enum class GroupType(private val matcher: (Char) -> Boolean) {
+private enum class GroupType(val matches: (Char) -> Boolean) {
     DIGIT({it.isDigit()}), LETTER({it.isLetter()}), NONE({false});
 
-    fun matches(char: Char): Boolean = matcher(char)
     operator fun plus(other: GroupType): GroupType = when {
             this == NONE -> other
             other == NONE || this == other -> this
@@ -29,7 +28,7 @@ private fun Char.getGroupType(): GroupType = when {
     else -> throw IllegalArgumentException("Input set contains invalid char: $this")
 }
 
-private class Group(
+private class Group private constructor(
     val type: GroupType,
     private var mandatory: Int = 0,
     private var optional: Int? = null
@@ -60,6 +59,7 @@ private fun String.toGroupList(): List<Group> {
     var actualGroup = createInitialGroup()
     val groupList = mutableListOf(actualGroup)
     forEach {
+        require(!it.isLowerCase()) {"Input set contains invalid char: $it"}
         if (actualGroup.type.matches(it)) {
             actualGroup.increase()
         } else {
