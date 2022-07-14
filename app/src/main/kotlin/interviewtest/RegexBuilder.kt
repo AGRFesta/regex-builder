@@ -3,13 +3,14 @@ package interviewtest
 import interviewtest.Group.Companion.createInitialGroup
 import interviewtest.Group.Companion.createNewGroup
 import interviewtest.Group.Companion.noneGroup
+import interviewtest.ParsedInput.Companion.parse
 
 fun Set<String>.buildRegex(): String {
     require(isNotEmpty()) {"Input Set can't be empty"}
 
-    return map { it.toGroupList() }
+    return map { parse(it) }
         .reduce { acc, elem -> acc + elem }
-        .joinToString(separator = "") { it.toString() }
+        .toString()
 }
 
 private enum class GroupType(val matches: (Char) -> Boolean) {
@@ -53,24 +54,32 @@ private class Group private constructor(
     }
 }
 
-private fun String.toGroupList(): List<Group> {
-    require(isNotEmpty()) {"Input set can't contain empty strings"}
-    require(this[0].isLetter()) {"First char must be a letter"}
-    var actualGroup = createInitialGroup()
-    val groupList = mutableListOf(actualGroup)
-    forEach {
-        if (actualGroup.type.matches(it)) {
-            actualGroup.increase()
-        } else {
-            actualGroup = createNewGroup(it.getGroupType())
-            groupList.add(actualGroup)
+private class ParsedInput private constructor(private val groups: List<Group>): List<Group> by groups {
+    companion object {
+        fun parse(string: String): ParsedInput {
+            require(string.isNotEmpty()) {"Input set can't contain empty strings"}
+            require(string[0].isLetter()) {"First char must be a letter"}
+            var actualGroup = createInitialGroup()
+            val groupList = mutableListOf(actualGroup)
+            string.forEach {
+                if (actualGroup.type.matches(it)) {
+                    actualGroup.increase()
+                } else {
+                    actualGroup = createNewGroup(it.getGroupType())
+                    groupList.add(actualGroup)
+                }
+            }
+            return ParsedInput(groupList)
         }
     }
-    return groupList
+
+    operator fun plus(other: ParsedInput): ParsedInput {
+        val mergedGroups = (0 until maxOf(this.size, other.size))
+            .map { this.getGroupOrNone(it) + other.getGroupOrNone(it) }
+        return ParsedInput(mergedGroups)
+    }
+
+    private fun List<Group>.getGroupOrNone(position: Int): Group = if (position >= size) noneGroup else this[position]
+
+    override fun toString(): String = groups.joinToString(separator = "") { it.toString() }
 }
-
-private operator fun List<Group>.plus(other: List<Group>): List<Group> =
-    (0 until maxOf(this.size, other.size))
-        .map { this.getGroupOrNone(it) + other.getGroupOrNone(it) }
-
-private fun List<Group>.getGroupOrNone(position: Int): Group = if (position >= size) noneGroup else this[position]
