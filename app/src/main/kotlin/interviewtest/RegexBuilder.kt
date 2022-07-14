@@ -41,7 +41,7 @@ private class Group private constructor(
     fun increase() { mandatory++ }
     override fun toString() = if (type == GroupType.LETTER) "[A-Z]${sizesToString()}" else "\\d${sizesToString()}"
     private fun sizesToString() = if (mandatory == 1 && optional == null) ""
-        else "{$mandatory${if (optional != null) ",$optional" else ""}}"
+        else "{$mandatory${optional?.let {",$optional"} ?: ""}}"
 
     private fun maxChars() = optional ?: mandatory
 
